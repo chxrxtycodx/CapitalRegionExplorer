@@ -4,17 +4,19 @@
     {
       "id": 1,
       "name": "New York State Museum",
-      "type": "Museum",
+      "typetag": "Museum",
+      "experiencetag": ["Day Trip", "Family", "Educational", "Indoors"],
       "description": "Museum showcasing New York’s natural and cultural history.",
       "address": "222 Madison Ave, Albany, NY",
       "latitude": 42.6528,
-      "longitude": -73.7570,
+      "longitude": -73.757,
       "website": "http://www.nysm.nysed.gov"
     },
     {
       "id": 2,
       "name": "The Egg",
-      "type": "Entertainment",
+      "typetag": "Entertainment",
+      "experiencetag": ["Night Life", "Day Trip", "Indoors"],
       "description": "Iconic performing arts venue at Empire State Plaza.",
       "address": "Empire State Plaza, Albany, NY",
       "latitude": 42.6519,
@@ -24,7 +26,8 @@
     {
       "id": 3,
       "name": "North Pearl Street",
-      "type": "District",
+      "typetag": "District",
+      "experiencetag": ["Food", "Night Life", "Day Trip"],
       "description": "Downtown street known for dining and nightlife.",
       "address": "N Pearl St, Albany, NY",
       "latitude": 42.6523,
@@ -34,7 +37,8 @@
     {
       "id": 4,
       "name": "Downtown Albany",
-      "type": "District",
+      "typetag": "District",
+      "experiencetag": ["Day Trip", "Walkable", "Historic"],
       "description": "Historic and commercial center of the city.",
       "address": "Downtown, Albany, NY",
       "latitude": 42.6526,
@@ -44,7 +48,8 @@
     {
       "id": 5,
       "name": "Albany City Hall",
-      "type": "Historic",
+      "typetag": "Historic",
+      "experiencetag": ["Free", "Day Trip", "Educational"],
       "description": "Romanesque Revival city hall built in the 1880s.",
       "address": "24 Eagle St, Albany, NY",
       "latitude": 42.6512,
@@ -54,17 +59,19 @@
     {
       "id": 6,
       "name": "Washington Park",
-      "type": "Park",
+      "typetag": "Park",
+      "experiencetag": ["Free", "Outdoors", "Family", "Day Trip"],
       "description": "Large urban park famous for the Tulip Festival.",
       "address": "Washington Park Rd, Albany, NY",
       "latitude": 42.6556,
-      "longitude": -73.7710,
+      "longitude": -73.771,
       "website": ""
     },
     {
       "id": 7,
       "name": "Palace Theatre",
-      "type": "Entertainment",
+      "typetag": "Entertainment",
+      "experiencetag": ["Night Life", "Day Trip", "Indoors"],
       "description": "Historic theater hosting concerts and performances.",
       "address": "19 Clinton Ave, Albany, NY",
       "latitude": 42.6571,
@@ -74,7 +81,8 @@
     {
       "id": 8,
       "name": "Crossgates Mall",
-      "type": "Shopping",
+      "typetag": "Shopping",
+      "experiencetag": ["Shopping", "Indoors", "Family", "Day Trip"],
       "description": "Large regional shopping and entertainment mall.",
       "address": "1 Crossgates Mall Rd, Albany, NY",
       "latitude": 42.6894,
@@ -84,7 +92,8 @@
     {
       "id": 9,
       "name": "Underground Railroad Education Center",
-      "type": "Historic",
+      "typetag": "Historic",
+      "experiencetag": ["Educational", "Day Trip", "Indoors"],
       "description": "Center highlighting Albany’s role in the Underground Railroad.",
       "address": "198 Livingston Ave, Albany, NY",
       "latitude": 42.6629,
@@ -94,10 +103,11 @@
     {
       "id": 10,
       "name": "The Crossings of Colonie",
-      "type": "Park",
+      "typetag": "Park",
+      "experiencetag": ["Free", "Outdoors", "Family", "Day Trip"],
       "description": "Large park with trails, fields, and community events.",
       "address": "580 Albany Shaker Rd, Loudonville, NY",
-      "latitude": 42.7350,
+      "latitude": 42.735,
       "longitude": -73.7693,
       "website": ""
     }

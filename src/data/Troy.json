@@ -103,7 +103,7 @@
     {
       "id": 10,
       "name": "Field of Horrors",
-      "type": "Attraction",
+      "typetag": "Attraction",
       "experiencetag": ["Night Life"],
       "description": "Seasonal haunted attraction popular during Halloween.",
       "address": "Troy, NY",
