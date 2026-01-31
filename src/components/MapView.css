@@ -16,6 +16,17 @@
   margin-bottom: 8px;
 }
 
+.filter-section {
+  margin-top: 10px;
+}
+
+.filter-section-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+  opacity: 0.9;
+}
+
+
 .chip-row {
   display: flex;
   gap: 8px;

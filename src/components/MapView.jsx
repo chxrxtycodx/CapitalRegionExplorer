@@ -8,7 +8,6 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
-// ✅ import your JSON files
 import AlbanyData from "../data/Albany.json";
 import TroyData from "../data/Troy.json";
 import SchenectadyData from "../data/Schenectady.json";
@@ -21,37 +20,43 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-// Helper: AND filtering (must include ALL selected tags)
-function matchesFilters(landmark, activeTags) {
-  if (activeTags.length === 0) return true;
-  return activeTags.every((tag) => landmark.tags.includes(tag));
+// ✅ Adapter: JSON -> app format
+function normalizeCityFile(cityFile) {
+  return cityFile.landmarks.map((lm) => {
+    const city = cityFile.city;
+
+    const typeTag = lm.typetag ?? lm.type ?? "";
+    const experienceTags = Array.isArray(lm.experiencetag) ? lm.experiencetag : [];
+
+    return {
+      id: `${city.toLowerCase()}-${lm.id}`,
+      city,
+      name: lm.name,
+      description: lm.description,
+      address: lm.address,
+      lat: lm.latitude,
+      lng: lm.longitude,
+      website: lm.website,
+      typetag: typeTag,
+      experiencetag: experienceTags,
+    };
+  });
 }
 
-// ✅ Adapter: convert teammate format -> your app format
-function normalizeCityFile(cityFile) {
-  // cityFile looks like: { city: "Albany", landmarks: [...] }
-  return cityFile.landmarks.map((lm) => ({
-    // Make IDs unique across cities (since each file restarts at 1)
-    id: `${cityFile.city.toLowerCase()}-${lm.id}`,
-
-    name: lm.name,
-    description: lm.description,
-    address: lm.address,
-    lat: lm.latitude,
-    lng: lm.longitude,
-    website: lm.website,
-
-    // Tags: include the landmark type + the city name
-    // (Later you can add more tags per landmark if you want)
-    tags: [lm.type, cityFile.city],
-  }));
+// ✅ AND logic for experience tags
+function matchesExperienceTags(landmark, selectedExperienceTags) {
+  if (selectedExperienceTags.length === 0) return true;
+  return selectedExperienceTags.every((tag) => landmark.experiencetag.includes(tag));
 }
 
 export default function MapView() {
   const [selected, setSelected] = useState(null);
-  const [activeTags, setActiveTags] = useState([]);
 
-  // ✅ Combine all cities into one list
+  // ✅ separate filter states
+  const [selectedCity, setSelectedCity] = useState(""); // single
+  const [selectedType, setSelectedType] = useState(""); // single
+  const [selectedExperienceTags, setSelectedExperienceTags] = useState([]); // multi AND
+
   const landmarks = useMemo(() => {
     return [
       ...normalizeCityFile(AlbanyData),
@@ -60,61 +65,138 @@ export default function MapView() {
     ];
   }, []);
 
-  // ✅ Build the chips from actual data
-  const allTags = useMemo(() => {
+  // ✅ Build filter options from data
+  const cityOptions = useMemo(() => {
+    return Array.from(new Set(landmarks.map((l) => l.city))).sort();
+  }, [landmarks]);
+
+  const typeOptions = useMemo(() => {
+    return Array.from(new Set(landmarks.map((l) => l.typetag).filter(Boolean))).sort();
+  }, [landmarks]);
+
+  const experienceOptions = useMemo(() => {
     const set = new Set();
-    landmarks.forEach((l) => l.tags.forEach((t) => set.add(t)));
+    landmarks.forEach((l) => l.experiencetag.forEach((t) => set.add(t)));
     return Array.from(set).sort();
   }, [landmarks]);
 
-  // ✅ Filter markers based on selected chips
+  // ✅ Apply all filters
   const filteredLandmarks = useMemo(() => {
-    return landmarks.filter((l) => matchesFilters(l, activeTags));
-  }, [landmarks, activeTags]);
+    return landmarks.filter((l) => {
+      const cityOk = selectedCity ? l.city === selectedCity : true;
+      const typeOk = selectedType ? l.typetag === selectedType : true;
+      const expOk = matchesExperienceTags(l, selectedExperienceTags);
+      return cityOk && typeOk && expOk;
+    });
+  }, [landmarks, selectedCity, selectedType, selectedExperienceTags]);
 
-  function toggleTag(tag) {
-    setActiveTags((prev) =>
+  // ✅ Chip toggles
+  function toggleCity(city) {
+    setSelectedCity((prev) => (prev === city ? "" : city));
+    setSelected(null);
+  }
+
+  function toggleType(type) {
+    setSelectedType((prev) => (prev === type ? "" : type));
+    setSelected(null);
+  }
+
+  function toggleExperienceTag(tag) {
+    setSelectedExperienceTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
 
-    // Close sheet if selection is no longer visible under the new filter set
+    // If current selected landmark no longer matches, close it
     setSelected((prevSelected) => {
       if (!prevSelected) return null;
-      const nextActive = activeTags.includes(tag)
-        ? activeTags.filter((t) => t !== tag)
-        : [...activeTags, tag];
-      return matchesFilters(prevSelected, nextActive) ? prevSelected : null;
+
+      const nextTags = selectedExperienceTags.includes(tag)
+        ? selectedExperienceTags.filter((t) => t !== tag)
+        : [...selectedExperienceTags, tag];
+
+      const stillVisible =
+        (selectedCity ? prevSelected.city === selectedCity : true) &&
+        (selectedType ? prevSelected.typetag === selectedType : true) &&
+        matchesExperienceTags(prevSelected, nextTags);
+
+      return stillVisible ? prevSelected : null;
     });
   }
 
-  function clearTags() {
-    setActiveTags([]);
+  function clearAllFilters() {
+    setSelectedCity("");
+    setSelectedType("");
+    setSelectedExperienceTags([]);
+    setSelected(null);
   }
+
+  const activeCount =
+    (selectedCity ? 1 : 0) + (selectedType ? 1 : 0) + selectedExperienceTags.length;
 
   return (
     <div className="map-wrapper">
       {/* Filter Bar */}
       <div className="filter-bar">
         <div className="filter-title">
-          Filters {activeTags.length > 0 && <span>({activeTags.length})</span>}
+          Filters {activeCount > 0 && <span>({activeCount})</span>}
         </div>
 
-        <div className="chip-row">
-          {allTags.map((tag) => (
-            <button
-              key={tag}
-              className={`chip ${activeTags.includes(tag) ? "chip-active" : ""}`}
-              onClick={() => toggleTag(tag)}
-              type="button"
-            >
-              {tag}
-            </button>
-          ))}
+        {/* City */}
+        <div className="filter-section">
+          <div className="filter-section-title">City</div>
+          <div className="chip-row">
+            {cityOptions.map((city) => (
+              <button
+                key={city}
+                className={`chip ${selectedCity === city ? "chip-active" : ""}`}
+                onClick={() => toggleCity(city)}
+                type="button"
+              >
+                {city}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {activeTags.length > 0 && (
-          <button className="clear-btn" onClick={clearTags} type="button">
-            Clear
+        {/* Type */}
+        <div className="filter-section">
+          <div className="filter-section-title">Type</div>
+          <div className="chip-row">
+            {typeOptions.map((type) => (
+              <button
+                key={type}
+                className={`chip ${selectedType === type ? "chip-active" : ""}`}
+                onClick={() => toggleType(type)}
+                type="button"
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Experience */}
+        <div className="filter-section">
+          <div className="filter-section-title">Experience</div>
+          <div className="chip-row">
+            {experienceOptions.map((tag) => (
+              <button
+                key={tag}
+                className={`chip ${
+                  selectedExperienceTags.includes(tag) ? "chip-active" : ""
+                }`}
+                onClick={() => toggleExperienceTag(tag)}
+                type="button"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {activeCount > 0 && (
+          <button className="clear-btn" onClick={clearAllFilters} type="button">
+            Clear all
           </button>
         )}
       </div>
@@ -122,7 +204,7 @@ export default function MapView() {
       {/* Map */}
       <MapContainer center={[42.68, -73.75]} zoom={12} className="map">
         <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
+          attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
@@ -147,7 +229,11 @@ export default function MapView() {
           <h2 className="sheet-title">{selected.name}</h2>
           <p className="sheet-desc">{selected.description}</p>
 
-          {selected.address && <p className="sheet-desc"><b>Address:</b> {selected.address}</p>}
+          {selected.address && (
+            <p className="sheet-desc">
+              <b>Address:</b> {selected.address}
+            </p>
+          )}
 
           {selected.website && (
             <p className="sheet-desc">
@@ -158,7 +244,9 @@ export default function MapView() {
           )}
 
           <div className="tag-row">
-            {selected.tags.map((t) => (
+            <span className="tag-pill">{selected.city}</span>
+            {selected.typetag && <span className="tag-pill">{selected.typetag}</span>}
+            {selected.experiencetag.map((t) => (
               <span key={t} className="tag-pill">
                 {t}
               </span>
