@@ -251,6 +251,7 @@ export default function MapView() {
 
           <Marker
             position={[userLocation.lat, userLocation.lng]}
+            zIndexOffset={1000}
             icon={L.divIcon({
               className: "user-location-icon",
               html: `<div class="user-dot"></div>`,
