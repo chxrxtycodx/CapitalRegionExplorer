@@ -52,6 +52,9 @@ function matchesExperienceTags(landmark, selectedExperienceTags) {
 export default function MapView() {
   const [selected, setSelected] = useState(null);
 
+  // ✅ Drawer open/close
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
   // ✅ separate filter states
   const [selectedCity, setSelectedCity] = useState(""); // single
   const [selectedType, setSelectedType] = useState(""); // single
@@ -134,74 +137,8 @@ export default function MapView() {
     (selectedCity ? 1 : 0) + (selectedType ? 1 : 0) + selectedExperienceTags.length;
 
   return (
-    <div className="map-wrapper">
-      {/* Filter Bar */}
-      <div className="filter-bar">
-        <div className="filter-title">
-          Filters {activeCount > 0 && <span>({activeCount})</span>}
-        </div>
-
-        {/* City */}
-        <div className="filter-section">
-          <div className="filter-section-title">City</div>
-          <div className="chip-row">
-            {cityOptions.map((city) => (
-              <button
-                key={city}
-                className={`chip ${selectedCity === city ? "chip-active" : ""}`}
-                onClick={() => toggleCity(city)}
-                type="button"
-              >
-                {city}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Type */}
-        <div className="filter-section">
-          <div className="filter-section-title">Type</div>
-          <div className="chip-row">
-            {typeOptions.map((type) => (
-              <button
-                key={type}
-                className={`chip ${selectedType === type ? "chip-active" : ""}`}
-                onClick={() => toggleType(type)}
-                type="button"
-              >
-                {type}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Experience */}
-        <div className="filter-section">
-          <div className="filter-section-title">Experience</div>
-          <div className="chip-row">
-            {experienceOptions.map((tag) => (
-              <button
-                key={tag}
-                className={`chip ${
-                  selectedExperienceTags.includes(tag) ? "chip-active" : ""
-                }`}
-                onClick={() => toggleExperienceTag(tag)}
-                type="button"
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {activeCount > 0 && (
-          <button className="clear-btn" onClick={clearAllFilters} type="button">
-            Clear all
-          </button>
-        )}
-      </div>
-
-      {/* Map */}
+    <div className="map-page">
+      {/* ✅ Map behind everything */}
       <MapContainer center={[42.68, -73.75]} zoom={12} className="map">
         <TileLayer
           attribution="&copy; OpenStreetMap contributors"
@@ -219,10 +156,113 @@ export default function MapView() {
         ))}
       </MapContainer>
 
+      {/* ✅ Floating title (top-left) */}
+      <div className="floating-title">Capital Region Explorer</div>
+
+      {/* ✅ Floating Filters button (top-right) */}
+      <button
+        className="floating-filters-btn"
+        type="button"
+        onClick={() => setFiltersOpen(true)}
+      >
+        Filters {activeCount > 0 ? `(${activeCount})` : ""}
+      </button>
+
+      {/* ✅ Backdrop to close drawer */}
+      {filtersOpen && (
+        <button
+          className="filters-backdrop"
+          type="button"
+          aria-label="Close filters"
+          onClick={() => setFiltersOpen(false)}
+        />
+      )}
+
+      {/* ✅ Drawer */}
+      <aside className={`filters-drawer ${filtersOpen ? "open" : ""}`}>
+        <div className="drawer-header">
+          <div className="drawer-title">
+            Filters {activeCount > 0 ? `(${activeCount})` : ""}
+          </div>
+          <button
+            className="drawer-close"
+            type="button"
+            onClick={() => setFiltersOpen(false)}
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="drawer-content">
+          {/* City */}
+          <div className="filter-section">
+            <div className="filter-section-title">City</div>
+            <div className="chip-row">
+              {cityOptions.map((city) => (
+                <button
+                  key={city}
+                  className={`chip ${selectedCity === city ? "chip-active" : ""}`}
+                  onClick={() => toggleCity(city)}
+                  type="button"
+                >
+                  {city}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Type */}
+          <div className="filter-section">
+            <div className="filter-section-title">Type</div>
+            <div className="chip-row">
+              {typeOptions.map((type) => (
+                <button
+                  key={type}
+                  className={`chip ${selectedType === type ? "chip-active" : ""}`}
+                  onClick={() => toggleType(type)}
+                  type="button"
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Experience */}
+          <div className="filter-section">
+            <div className="filter-section-title">Experience</div>
+            <div className="chip-row">
+              {experienceOptions.map((tag) => (
+                <button
+                  key={tag}
+                  className={`chip ${
+                    selectedExperienceTags.includes(tag) ? "chip-active" : ""
+                  }`}
+                  onClick={() => toggleExperienceTag(tag)}
+                  type="button"
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {activeCount > 0 && (
+            <button className="clear-btn" onClick={clearAllFilters} type="button">
+              Clear all
+            </button>
+          )}
+        </div>
+      </aside>
+
       {/* Bottom sheet */}
       {selected && (
         <div className="bottom-sheet" role="dialog" aria-modal="true">
-          <button className="close-btn" onClick={() => setSelected(null)} type="button">
+          <button
+            className="close-btn"
+            onClick={() => setSelected(null)}
+            type="button"
+          >
             ✕
           </button>
 
