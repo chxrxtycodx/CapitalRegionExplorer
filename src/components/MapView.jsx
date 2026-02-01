@@ -12,6 +12,31 @@ import AlbanyData from "../data/Albany.json";
 import TroyData from "../data/Troy.json";
 import SchenectadyData from "../data/Schenectady.json";
 
+// ✅ Sample upcoming events (replace with real data later)
+const UPCOMING_EVENTS = [
+  {
+    id: 1,
+    name: "Troy Night Out",
+    date: "Feb 15, 2026",
+    location: "Downtown Troy",
+    link: "https://www.troyny.gov"
+  },
+  {
+    id: 2,
+    name: "Winter Farmers Market",
+    date: "Feb 8, 2026",
+    location: "Empire State Plaza, Albany",
+    link: "https://www.albanyfarmersmarket.com"
+  },
+  {
+    id: 3,
+    name: "Schenectady Music Festival",
+    date: "Feb 22, 2026",
+    location: "Proctors Theatre",
+    link: "https://www.proctors.org"
+  }
+];
+
 // Fix Leaflet marker icons for Vite
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -209,6 +234,148 @@ function PhotoCarousel({ photos }) {
   );
 }
 
+// ✅ Map Apps Selector Component
+function MapAppsMenu({ address, lat, lng, onClose }) {
+  const mapLinks = {
+    google: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
+    apple: `https://maps.apple.com/?address=${encodeURIComponent(address)}`,
+    waze: `https://www.waze.com/ul?ll=${lat},${lng}&navigate=yes&zoom=17`
+  };
+
+  return (
+    <div className="map-apps-menu">
+      <div className="map-apps-title">Open in:</div>
+      <a href={mapLinks.google} target="_blank" rel="noreferrer" className="map-app-link">
+        <span className="map-app-icon">🗺️</span>
+        Google Maps
+      </a>
+      <a href={mapLinks.apple} target="_blank" rel="noreferrer" className="map-app-link">
+        <span className="map-app-icon">🍎</span>
+        Apple Maps
+      </a>
+      <a href={mapLinks.waze} target="_blank" rel="noreferrer" className="map-app-link">
+        <span className="map-app-icon">🚗</span>
+        Waze
+      </a>
+      <button className="map-apps-close" onClick={onClose} type="button">✕</button>
+    </div>
+  );
+}
+
+// ✅ Events Banner Component - Hover to reveal
+function EventsBanner({ events }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
+
+  useEffect(() => {
+    if (events.length === 0) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % events.length);
+    }, 5000); // Change event every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [events.length]);
+
+  if (events.length === 0) return null;
+
+  const currentEvent = events[currentIndex];
+  const isVisible = isHovered || isPinned;
+
+  const goToPrev = () => {
+    setCurrentIndex((prev) => (prev === 0 ? events.length - 1 : prev - 1));
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % events.length);
+  };
+
+  return (
+    <div 
+      className={`events-banner ${isVisible ? 'events-banner-visible' : ''}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Tab that's always visible */}
+      <div className="events-tab">
+        <span className="events-tab-text">Upcoming Events</span>
+        <span className="events-arrow">▼</span>
+      </div>
+
+      {/* Full content that slides down */}
+      <div className="events-content">
+        <div className="events-banner-inner">
+          {/* Previous button */}
+          {events.length > 1 && (
+            <button
+              className="events-nav events-nav-prev"
+              onClick={goToPrev}
+              type="button"
+              aria-label="Previous event"
+            >
+              ‹
+            </button>
+          )}
+          
+          <span className="events-icon">📅</span>
+          <div className="events-text">
+            <strong>{currentEvent.name}</strong>
+            <span className="events-divider">•</span>
+            <span>{currentEvent.date}</span>
+            <span className="events-divider">•</span>
+            <span>{currentEvent.location}</span>
+          </div>
+          {currentEvent.link && (
+            <a 
+              href={currentEvent.link} 
+              target="_blank" 
+              rel="noreferrer"
+              className="events-link"
+            >
+              Learn more →
+            </a>
+          )}
+          
+          {/* Next button */}
+          {events.length > 1 && (
+            <button
+              className="events-nav events-nav-next"
+              onClick={goToNext}
+              type="button"
+              aria-label="Next event"
+            >
+              ›
+            </button>
+          )}
+          
+          <button
+            className="events-pin-btn"
+            onClick={() => setIsPinned(!isPinned)}
+            type="button"
+            title={isPinned ? "Unpin banner" : "Keep banner open"}
+          >
+            {isPinned ? "📌" : "📍"}
+          </button>
+        </div>
+        {events.length > 1 && (
+          <div className="events-dots">
+            {events.map((_, idx) => (
+              <button
+                key={idx}
+                className={`events-dot ${idx === currentIndex ? 'events-dot-active' : ''}`}
+                onClick={() => setCurrentIndex(idx)}
+                type="button"
+                aria-label={`View event ${idx + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ✅ Component to handle map clicks for pin placement
 function MapClickHandler({ onMapClick, pinMode }) {
   const map = useMap();
@@ -235,6 +402,9 @@ export default function MapView() {
   // ✅ Pin mode states
   const [pinMode, setPinMode] = useState(true);
   const [droppedPin, setDroppedPin] = useState(null);
+  
+  // ✅ Map apps menu state
+  const [showMapApps, setShowMapApps] = useState(false);
   
   // location states
   const [userLocation, setUserLocation] = useState(null); // {lat, lng, accuracy}
@@ -427,6 +597,9 @@ export default function MapView() {
 
   return (
     <div className="map-page">
+      {/* ✅ Events Banner at the top */}
+      <EventsBanner events={UPCOMING_EVENTS} />
+
       {/* ✅ Map behind everything with pin cursor */}
       <MapContainer 
         center={[42.68, -73.75]} 
@@ -808,9 +981,40 @@ export default function MapView() {
           <p className="sheet-desc">{selected.description}</p>
 
           {selected.address && (
-            <p className="sheet-desc">
-              <b>Address:</b> {selected.address}
-            </p>
+            <div className="sheet-address-row">
+              <div className="sheet-address-text">
+                <b>📍 Address:</b> {selected.address}
+              </div>
+              <div className="map-apps-icons">
+                <a 
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selected.address)}`}
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="map-app-icon-btn"
+                  title="Open in Google Maps"
+                >
+                  🗺️
+                </a>
+                <a 
+                  href={`https://maps.apple.com/?address=${encodeURIComponent(selected.address)}`}
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="map-app-icon-btn"
+                  title="Open in Apple Maps"
+                >
+                  🍎
+                </a>
+                <a 
+                  href={`https://www.waze.com/ul?ll=${selected.lat},${selected.lng}&navigate=yes&zoom=17`}
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="map-app-icon-btn"
+                  title="Open in Waze"
+                >
+                  🚗
+                </a>
+              </div>
+            </div>
           )}
 
           {selected.website && (

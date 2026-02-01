@@ -636,3 +636,643 @@
     opacity: 1;
   }
 }
+/* ✅ Events Banner */
+.events-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.events-banner.expanded {
+  padding: 16px 20px;
+}
+
+.events-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.events-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.events-text {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.events-text strong {
+  font-weight: 600;
+}
+
+.events-divider {
+  opacity: 0.7;
+}
+
+.events-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.events-link:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(2px);
+}
+
+.events-toggle {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.events-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.events-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.events-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s;
+}
+
+.events-dot:hover {
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(1.3);
+}
+
+.events-dot-active {
+  background: white;
+  width: 18px;
+  border-radius: 3px;
+}
+
+/* Adjust other floating elements to account for banner */
+.floating-title {
+  top: 68px;
+}
+
+.floating-filters-btn {
+  top: 68px;
+}
+
+#root .leaflet-top.leaflet-left {
+  top: 120px;
+}
+
+.map-page .leaflet-control-zoom {
+  margin-top: 130px !important;
+}
+
+@media (max-width: 600px) {
+  .events-banner-content {
+    gap: 8px;
+  }
+  
+  .events-text {
+    font-size: 13px;
+  }
+  
+  .events-link {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .floating-title {
+    top: 68px;
+  }
+  
+  .floating-filters-btn {
+    top: 68px;
+  }
+  
+  .map-page .leaflet-control-zoom {
+    margin-top: 120px !important;
+  }
+}
+/* ✅ Events Banner - Hover to reveal */
+.events-banner {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  z-index: 1100;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-radius: 0 0 12px 12px;
+  transition: transform 0.3s ease;
+  min-width: 400px;
+  max-width: 600px;
+}
+
+.events-banner-visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Tab that's always visible at top */
+.events-tab {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #d1b3cf 0%, #764ba2 100%);
+  padding: 8px 20px;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.events-banner:hover .events-tab {
+  bottom: -36px;
+}
+
+.events-tab-text {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.events-arrow {
+  font-size: 10px;
+  animation: bounceArrow 1.5s ease-in-out infinite;
+}
+
+@keyframes bounceArrow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+/* Full content */
+.events-content {
+  padding: 16px 20px;
+}
+
+.events-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.events-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.events-text {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.events-text strong {
+  font-weight: 600;
+}
+
+.events-divider {
+  opacity: 0.7;
+}
+
+.events-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.events-link:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(2px);
+}
+
+.events-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.events-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s;
+}
+
+.events-dot:hover {
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(1.3);
+}
+
+.events-dot-active {
+  background: white;
+  width: 18px;
+  border-radius: 3px;
+}
+
+/* Keep original spacing for other elements */
+.floating-title {
+  top: 18px;
+}
+
+.floating-filters-btn {
+  top: 18px;
+}
+
+#root .leaflet-top.leaflet-left {
+  top: 70px;
+}
+
+.map-page .leaflet-control-zoom {
+  margin-top: 80px !important;
+}
+
+@media (max-width: 600px) {
+  .events-banner {
+    min-width: 90vw;
+    max-width: 90vw;
+  }
+  
+  .events-tab-text {
+    font-size: 12px;
+  }
+  
+  .events-banner-inner {
+    gap: 8px;
+  }
+  
+  .events-text {
+    font-size: 13px;
+  }
+  
+  .events-link {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .map-page .leaflet-control-zoom {
+    margin-top: 70px !important;
+  }
+}
+/* ✅ Address section with map apps menu */
+.sheet-address-section {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.sheet-address-btn {
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 8px;
+  padding: 10px 12px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  color: #333;
+}
+
+.sheet-address-btn:hover {
+  background: rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+.sheet-address-btn b {
+  margin-right: 6px;
+}
+
+/* Map apps popup menu */
+.map-apps-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  z-index: 100;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.map-apps-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.map-app-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.map-app-link:last-of-type {
+  margin-bottom: 0;
+}
+
+.map-app-link:hover {
+  background: rgba(102, 126, 234, 0.05);
+  border-color: rgba(102, 126, 234, 0.3);
+  transform: translateX(4px);
+}
+
+.map-app-icon {
+  font-size: 20px;
+}
+
+.map-apps-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.map-apps-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
+}
+
+/* ✅ Events Banner - Hover to reveal */
+.events-banner {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  z-index: 1100;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-radius: 0 0 12px 12px;
+  transition: transform 0.3s ease;
+  min-width: 500px;
+  max-width: 700px;
+}
+
+.events-banner-visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Tab that's always visible at top */
+.events-tab {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 8px 20px;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.events-banner:hover .events-tab {
+  bottom: -36px;
+}
+
+.events-tab-text {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.events-arrow {
+  font-size: 10px;
+  animation: bounceArrow 1.5s ease-in-out infinite;
+}
+
+@keyframes bounceArrow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+/* Full content */
+.events-content {
+  padding: 16px 20px;
+}
+
+.events-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Previous/Next navigation buttons */
+.events-nav {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.events-nav:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.events-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.events-text {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.events-text strong {
+  font-weight: 600;
+}
+
+.events-divider {
+  opacity: 0.7;
+}
+
+.events-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.events-link:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(2px);
+}
+
+/* Pin button to keep banner open */
+.events-pin-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.events-pin-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.events-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.events-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s;
+}
+
+.events-dot:hover {
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(1.3);
+}
+
+.events-dot-active {
+  background: white;
+  width: 18px;
+  border-radius: 3px;
+}
+
+/* ✅ Address row with inline map icons */
+.sheet-address-row {
+  display: flex;
+  align-items:
+}
