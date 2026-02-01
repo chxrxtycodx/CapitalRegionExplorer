@@ -14,7 +14,7 @@
   width: 100%;
 }
 
-/* Optional: ensure Leaflet controls don't hide behind title/drawer */
+/* Optional: ensure Leaflet controls don’t hide behind title/drawer */
 .leaflet-top,
 .leaflet-bottom {
   z-index: 900;
@@ -30,7 +30,7 @@
   top: 18px;
   left: 18px;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.70);
   backdrop-filter: blur(6px);
   padding: 12px 16px;
   border-radius: 14px;
@@ -108,49 +108,9 @@
   cursor: pointer;
 }
 
-/* ✅ NEW: Tab navigation */
-.drawer-tabs {
-  display: flex;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(0, 0, 0, 0.02);
-}
-
-.drawer-tab {
-  flex: 1;
-  padding: 12px 8px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.6);
-  position: relative;
-  transition: color 150ms;
-}
-
-.drawer-tab:hover {
-  color: rgba(0, 0, 0, 0.9);
-}
-
-.drawer-tab-active {
-  color: #111;
-  font-weight: 600;
-}
-
-.drawer-tab-active::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #111;
-}
-
 .drawer-content {
   padding: 14px;
   overflow: auto;
-  flex: 1;
 }
 
 /* =========================
@@ -202,123 +162,6 @@
 }
 
 /* =========================
-   ✅ NEW: List views (Nearby & Saved)
-   ========================= */
-
-.list-view {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.list-header {
-  font-weight: 600;
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.6);
-  padding: 8px 0;
-  margin-bottom: 4px;
-}
-
-.list-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 10px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: all 150ms;
-}
-
-.list-item:hover {
-  background: rgba(0, 0, 0, 0.02);
-  border-color: rgba(0, 0, 0, 0.15);
-}
-
-.list-item-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.list-item-title {
-  font-weight: 600;
-  font-size: 15px;
-  margin-bottom: 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.list-item-subtitle {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.6);
-}
-
-.star-btn {
-  border: none;
-  background: transparent;
-  font-size: 20px;
-  cursor: pointer;
-  padding: 4px;
-  color: #f59e0b;
-  line-height: 1;
-}
-
-.star-btn:hover {
-  transform: scale(1.1);
-}
-
-/* =========================
-   ✅ NEW: Empty states
-   ========================= */
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  text-align: center;
-}
-
-.empty-state-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
-  opacity: 0.4;
-}
-
-.empty-state-title {
-  font-weight: 600;
-  font-size: 16px;
-  margin-bottom: 6px;
-}
-
-.empty-state-text {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.6);
-  max-width: 280px;
-  line-height: 1.5;
-}
-
-.empty-state-btn {
-  margin-top: 16px;
-  background: #111;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 10px 16px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.empty-state-btn:hover {
-  background: #333;
-}
-
-/* =========================
    Bottom sheet
    ========================= */
 
@@ -349,34 +192,8 @@
   cursor: pointer;
 }
 
-.sheet-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
 .sheet-title {
-  margin: 0;
-  flex: 1;
-  padding-right: 28px;
-}
-
-.star-btn-large {
-  border: none;
-  background: rgba(245, 158, 11, 0.1);
-  font-size: 24px;
-  cursor: pointer;
-  padding: 8px 12px;
-  color: #f59e0b;
-  border-radius: 8px;
-  line-height: 1;
-  transition: all 150ms;
-}
-
-.star-btn-large:hover {
-  background: rgba(245, 158, 11, 0.2);
-  transform: scale(1.05);
+  margin: 0 28px 6px 0;
 }
 
 .sheet-desc {
@@ -415,13 +232,13 @@
   z-index: 1000;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(6px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0,0,0,0.1);
   width: 44px;
   height: 44px;
   border-radius: 999px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
 }
 
 /* Blue dot marker (divIcon) */
@@ -434,8 +251,8 @@
   width: 14px;
   height: 14px;
   border-radius: 999px;
-  background: #1a73e8;
-  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.25);
+  background: #1a73e8;               /* blue dot */
+  box-shadow: 0 0 0 3px rgba(26,115,232,0.25);
   border: 2px solid white;
 }
 
@@ -453,10 +270,10 @@
   width: min(360px, calc(100vw - 36px));
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0,0,0,0.08);
   border-radius: 14px;
   padding: 12px 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
 }
 
 .location-prompt-title {
@@ -493,9 +310,24 @@
 
 .location-dismiss {
   background: transparent;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0,0,0,0.15);
   border-radius: 10px;
   padding: 8px 10px;
   cursor: pointer;
   font-size: 14px;
+}
+
+.sheet-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sheet-image {
+  width: 100%;
+  height: 88px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.08);
 }

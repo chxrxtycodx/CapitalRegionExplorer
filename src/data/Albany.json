@@ -10,7 +10,10 @@
       "address": "222 Madison Ave, Albany, NY",
       "latitude": 42.6528,
       "longitude": -73.7570,
-      "website": "http://www.nysm.nysed.gov"
+      "website": "http://www.nysm.nysed.gov",
+      "images": [
+        "/photos/Albany/Albany City Hall/download.jpg"
+      ]
     },
     {
       "id": 2,

@@ -39,6 +39,7 @@ function normalizeCityFile(cityFile) {
       website: lm.website,
       typetag: typeTag,
       experiencetag: experienceTags,
+      images: Array.isArray(lm.images) ? lm.images : [],
     };
   });
 }
@@ -72,20 +73,6 @@ function LocateButton({ userLocation, onRequestLocation }) {
   );
 }
 
-function haversineMiles(lat1, lon1, lat2, lon2) {
-  const toRad = (v) => (v * Math.PI) / 180;
-  const R = 3958.7613; // Earth radius in miles
-
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-
-  return 2 * R * Math.asin(Math.sqrt(a));
-}
-
 export default function MapView() {
   const [selected, setSelected] = useState(null);
   
@@ -96,37 +83,19 @@ export default function MapView() {
 
   const [watchId, setWatchId] = useState(null);
 
-  // ✅ Saved landmarks (persisted to localStorage)
-  const [savedLandmarks, setSavedLandmarks] = useState(() => {
-    try {
-      const saved = localStorage.getItem("savedLandmarks");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
+  useEffect(() => {
+  return () => {
+    if (watchId != null && "geolocation" in navigator) {
+      navigator.geolocation.clearWatch(watchId);
     }
-  });
+  };
+}, [watchId]);
 
-  // ✅ Active view: 'filters' or 'nearby' or 'saved'
-  const [activeView, setActiveView] = useState("filters");
-
-  useEffect(() => {
-    return () => {
-      if (watchId != null && "geolocation" in navigator) {
-        navigator.geolocation.clearWatch(watchId);
-      }
-    };
-  }, [watchId]);
-
-  useEffect(() => {
+    useEffect(() => {
     if (userLocation) {
-      setShowLocationPrompt(false);
+        setShowLocationPrompt(false);
     }
-  }, [userLocation]);
-
-  // ✅ Save to localStorage whenever savedLandmarks changes
-  useEffect(() => {
-    localStorage.setItem("savedLandmarks", JSON.stringify(savedLandmarks));
-  }, [savedLandmarks]);
+    }, [userLocation]);
 
   // ✅ Drawer open/close
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -169,38 +138,6 @@ export default function MapView() {
     });
   }, [landmarks, selectedCity, selectedType, selectedExperienceTags]);
 
-  const NEARBY_RADIUS_MI = 3;
-  const NEARBY_LIMIT = 10;
-
-  const nearby = useMemo(() => {
-    if (!userLocation) return [];
-
-    const withDistance = filteredLandmarks
-      .map((l) => ({
-        ...l,
-        distanceMi: haversineMiles(userLocation.lat, userLocation.lng, l.lat, l.lng),
-      }))
-      .filter((l) => l.distanceMi <= NEARBY_RADIUS_MI)
-      .sort((a, b) => a.distanceMi - b.distanceMi)
-      .slice(0, NEARBY_LIMIT);
-
-    return withDistance;
-  }, [userLocation, filteredLandmarks]);
-
-  // ✅ Get saved landmark objects
-  const savedLandmarkObjects = useMemo(() => {
-    return landmarks.filter((l) => savedLandmarks.includes(l.id));
-  }, [landmarks, savedLandmarks]);
-
-  // ✅ Toggle saved
-  function toggleSaved(landmarkId) {
-    setSavedLandmarks((prev) =>
-      prev.includes(landmarkId)
-        ? prev.filter((id) => id !== landmarkId)
-        : [...prev, landmarkId]
-    );
-  }
-
   // ✅ Chip toggles
   function toggleCity(city) {
     setSelectedCity((prev) => (prev === city ? "" : city));
@@ -217,6 +154,7 @@ export default function MapView() {
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
 
+    // If current selected landmark no longer matches, close it
     setSelected((prevSelected) => {
       if (!prevSelected) return null;
 
@@ -244,149 +182,155 @@ export default function MapView() {
     (selectedCity ? 1 : 0) + (selectedType ? 1 : 0) + selectedExperienceTags.length;
 
   function startLocationTracking() {
-    setGeoError("");
+  setGeoError("");
 
-    if (!("geolocation" in navigator)) {
-      setGeoError("Geolocation isn't supported in this browser.");
-      return;
-    }
-
-    if (watchId != null) {
-      navigator.geolocation.clearWatch(watchId);
-      setWatchId(null);
-    }
-
-    const id = navigator.geolocation.watchPosition(
-      (pos) => {
-        setUserLocation({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
-        });
-      },
-      (err) => {
-        setGeoError(err.message || "Couldn't get your location.");
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 15000,
-        timeout: 10000,
-      }
-    );
-
-    setWatchId(id);
-    return id;
+  if (!("geolocation" in navigator)) {
+    setGeoError("Geolocation isn’t supported in this browser.");
+    return;
   }
+
+  // ✅ Clear any previous watcher before starting a new one
+  if (watchId != null) {
+    navigator.geolocation.clearWatch(watchId);
+    setWatchId(null);
+  }
+
+  const id = navigator.geolocation.watchPosition(
+    (pos) => {
+      setUserLocation({
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        accuracy: pos.coords.accuracy,
+      });
+    },
+    (err) => {
+      setGeoError(err.message || "Couldn’t get your location.");
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 15000,
+      timeout: 10000,
+    }
+  );
+
+  // ✅ Save it so we can clear on unmount
+  setWatchId(id);
+
+  return id;
+}
+
 
   return (
     <div className="map-page">
-      {/* ✅ Map behind everything */}
-      <MapContainer center={[42.68, -73.75]} zoom={12} className="map">
-        <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+    {/* ✅ Map behind everything */}
+    <MapContainer center={[42.68, -73.75]} zoom={12} className="map">
+      <TileLayer
+        attribution="&copy; OpenStreetMap contributors"
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
 
-        {/* Landmark markers */}
-        {filteredLandmarks.map((lm) => (
-          <Marker
-            key={lm.id}
-            position={[lm.lat, lm.lng]}
-            eventHandlers={{
-              click: () => setSelected(lm),
-            }}
+      {/* Landmark markers */}
+      {filteredLandmarks.map((lm) => (
+        <Marker
+          key={lm.id}
+          position={[lm.lat, lm.lng]}
+          eventHandlers={{
+            click: () => setSelected(lm),
+          }}
+        />
+      ))}
+
+      {/* ✅ User location (blue dot + accuracy ring) */}
+      {userLocation && (
+        <>
+          <Circle
+            center={[userLocation.lat, userLocation.lng]}
+            radius={Math.min(userLocation.accuracy || 40, 150)}
+            pathOptions={{}}
+            className="user-accuracy"
           />
-        ))}
 
-        {/* ✅ User location (blue dot + accuracy ring) */}
-        {userLocation && (
-          <>
-            <Circle
-              center={[userLocation.lat, userLocation.lng]}
-              radius={Math.min(userLocation.accuracy || 40, 150)}
-              pathOptions={{}}
-              className="user-accuracy"
-            />
+          <Marker
+            position={[userLocation.lat, userLocation.lng]}
+            zIndexOffset={1000}
+            icon={L.divIcon({
+              className: "user-location-icon",
+              html: `<div class="user-dot"></div>`,
+              iconSize: [18, 18],
+              iconAnchor: [9, 9],
+            })}
+          />
+        </>
+      )}
 
-            <Marker
-              position={[userLocation.lat, userLocation.lng]}
-              zIndexOffset={1000}
-              icon={L.divIcon({
-                className: "user-location-icon",
-                html: `<div class="user-dot"></div>`,
-                iconSize: [18, 18],
-                iconAnchor: [9, 9],
-              })}
-            />
-          </>
-        )}
+      {/* ✅ Floating locate button that uses map instance */}
+      <LocateButton
+        userLocation={userLocation}
+        onRequestLocation={() => setShowLocationPrompt(true)}
+      />
+    </MapContainer>
 
-        {/* ✅ Floating locate button that uses map instance */}
-        <LocateButton
-          userLocation={userLocation}
-          onRequestLocation={() => setShowLocationPrompt(true)}
-        />
-      </MapContainer>
-
-      {/* ✅ Location prompt (overlay) */}
-      {showLocationPrompt && !userLocation && (
-        <div className="location-prompt">
-          <div className="location-prompt-title">See what's around you?</div>
-          <div className="location-prompt-text">
-            Enable location to show nearby places and your position on the map.
-          </div>
-
-          {geoError && <div className="location-error">{geoError}</div>}
-
-          <div className="location-prompt-actions">
-            <button
-              className="location-allow"
-              type="button"
-              onClick={() => {
-                startLocationTracking();
-                setShowLocationPrompt(false);
-              }}
-            >
-              Use my location
-            </button>
-
-            <button
-              className="location-dismiss"
-              type="button"
-              onClick={() => setShowLocationPrompt(false)}
-            >
-              Not now
-            </button>
-          </div>
+    {/* ✅ Location prompt (overlay) */}
+    {showLocationPrompt && !userLocation && (
+      <div className="location-prompt">
+        <div className="location-prompt-title">See what’s around you?</div>
+        <div className="location-prompt-text">
+          Enable location to show nearby places and your position on the map.
         </div>
-      )}
 
-      {/* ✅ Floating title (top-left) */}
-      <div className="floating-title">Capital Region Explorer</div>
+        {geoError && <div className="location-error">{geoError}</div>}
 
-      {/* ✅ Floating menu button (top-right) */}
+        <div className="location-prompt-actions">
+          <button
+            className="location-allow"
+            type="button"
+            onClick={() => {
+              startLocationTracking();
+              setShowLocationPrompt(false);
+            }}
+          >
+            Use my location
+          </button>
+
+          <button
+            className="location-dismiss"
+            type="button"
+            onClick={() => setShowLocationPrompt(false)}
+          >
+            Not now
+          </button>
+        </div>
+      </div>
+    )}
+
+    {/* ✅ Floating title (top-left) */}
+    <div className="floating-title">Capital Region Explorer</div>
+
+    {/* ✅ Floating Filters button (top-right) */}
+    <button
+      className="floating-filters-btn"
+      type="button"
+      onClick={() => setFiltersOpen(true)}
+    >
+      Filters {activeCount > 0 ? `(${activeCount})` : ""}
+    </button>
+
+    {/* ✅ Backdrop to close drawer */}
+    {filtersOpen && (
       <button
-        className="floating-filters-btn"
+        className="filters-backdrop"
         type="button"
-        onClick={() => setFiltersOpen(true)}
-      >
-        Menu
-      </button>
+        aria-label="Close filters"
+        onClick={() => setFiltersOpen(false)}
+      />
+    )}
 
-      {/* ✅ Backdrop to close drawer */}
-      {filtersOpen && (
-        <button
-          className="filters-backdrop"
-          type="button"
-          aria-label="Close menu"
-          onClick={() => setFiltersOpen(false)}
-        />
-      )}
-
-      {/* ✅ Drawer with tabs */}
+      {/* ✅ Drawer */}
       <aside className={`filters-drawer ${filtersOpen ? "open" : ""}`}>
         <div className="drawer-header">
-          <div className="drawer-title">Capital Region Explorer</div>
+          <div className="drawer-title">
+            Filters {activeCount > 0 ? `(${activeCount})` : ""}
+          </div>
           <button
             className="drawer-close"
             type="button"
@@ -396,210 +340,64 @@ export default function MapView() {
           </button>
         </div>
 
-        {/* ✅ Tab navigation */}
-        <div className="drawer-tabs">
-          <button
-            className={`drawer-tab ${activeView === "filters" ? "drawer-tab-active" : ""}`}
-            onClick={() => setActiveView("filters")}
-            type="button"
-          >
-            Filters {activeCount > 0 ? `(${activeCount})` : ""}
-          </button>
-          <button
-            className={`drawer-tab ${activeView === "nearby" ? "drawer-tab-active" : ""}`}
-            onClick={() => setActiveView("nearby")}
-            type="button"
-          >
-            Nearby {nearby.length > 0 ? `(${nearby.length})` : ""}
-          </button>
-          <button
-            className={`drawer-tab ${activeView === "saved" ? "drawer-tab-active" : ""}`}
-            onClick={() => setActiveView("saved")}
-            type="button"
-          >
-            Saved {savedLandmarks.length > 0 ? `(${savedLandmarks.length})` : ""}
-          </button>
-        </div>
-
         <div className="drawer-content">
-          {/* ✅ FILTERS VIEW */}
-          {activeView === "filters" && (
-            <>
-              {/* City */}
-              <div className="filter-section">
-                <div className="filter-section-title">City</div>
-                <div className="chip-row">
-                  {cityOptions.map((city) => (
-                    <button
-                      key={city}
-                      className={`chip ${selectedCity === city ? "chip-active" : ""}`}
-                      onClick={() => toggleCity(city)}
-                      type="button"
-                    >
-                      {city}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Type */}
-              <div className="filter-section">
-                <div className="filter-section-title">Type</div>
-                <div className="chip-row">
-                  {typeOptions.map((type) => (
-                    <button
-                      key={type}
-                      className={`chip ${selectedType === type ? "chip-active" : ""}`}
-                      onClick={() => toggleType(type)}
-                      type="button"
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Experience */}
-              <div className="filter-section">
-                <div className="filter-section-title">Experience</div>
-                <div className="chip-row">
-                  {experienceOptions.map((tag) => (
-                    <button
-                      key={tag}
-                      className={`chip ${
-                        selectedExperienceTags.includes(tag) ? "chip-active" : ""
-                      }`}
-                      onClick={() => toggleExperienceTag(tag)}
-                      type="button"
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {activeCount > 0 && (
-                <button className="clear-btn" onClick={clearAllFilters} type="button">
-                  Clear all filters
+          {/* City */}
+          <div className="filter-section">
+            <div className="filter-section-title">City</div>
+            <div className="chip-row">
+              {cityOptions.map((city) => (
+                <button
+                  key={city}
+                  className={`chip ${selectedCity === city ? "chip-active" : ""}`}
+                  onClick={() => toggleCity(city)}
+                  type="button"
+                >
+                  {city}
                 </button>
-              )}
-            </>
-          )}
-
-          {/* ✅ NEARBY VIEW */}
-          {activeView === "nearby" && (
-            <div className="list-view">
-              {!userLocation ? (
-                <div className="empty-state">
-                  <div className="empty-state-icon">📍</div>
-                  <div className="empty-state-title">Location needed</div>
-                  <div className="empty-state-text">
-                    Enable location access to see landmarks near you
-                  </div>
-                  <button
-                    className="empty-state-btn"
-                    onClick={() => {
-                      setShowLocationPrompt(true);
-                      setFiltersOpen(false);
-                    }}
-                    type="button"
-                  >
-                    Enable location
-                  </button>
-                </div>
-              ) : nearby.length === 0 ? (
-                <div className="empty-state">
-                  <div className="empty-state-icon">🔍</div>
-                  <div className="empty-state-title">Nothing nearby</div>
-                  <div className="empty-state-text">
-                    No landmarks found within {NEARBY_RADIUS_MI} miles
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="list-header">
-                    Within {NEARBY_RADIUS_MI} miles of you
-                  </div>
-                  {nearby.map((lm) => (
-                    <div
-                      key={lm.id}
-                      className="list-item"
-                      onClick={() => {
-                        setSelected(lm);
-                        setFiltersOpen(false);
-                      }}
-                    >
-                      <div className="list-item-content">
-                        <div className="list-item-title">{lm.name}</div>
-                        <div className="list-item-subtitle">
-                          {lm.distanceMi.toFixed(1)} mi · {lm.city}
-                        </div>
-                      </div>
-                      <button
-                        className="star-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleSaved(lm.id);
-                        }}
-                        type="button"
-                        title={savedLandmarks.includes(lm.id) ? "Remove from saved" : "Save"}
-                      >
-                        {savedLandmarks.includes(lm.id) ? "★" : "☆"}
-                      </button>
-                    </div>
-                  ))}
-                </>
-              )}
+              ))}
             </div>
-          )}
+          </div>
 
-          {/* ✅ SAVED VIEW */}
-          {activeView === "saved" && (
-            <div className="list-view">
-              {savedLandmarkObjects.length === 0 ? (
-                <div className="empty-state">
-                  <div className="empty-state-icon">⭐</div>
-                  <div className="empty-state-title">No saved landmarks</div>
-                  <div className="empty-state-text">
-                    Star landmarks you want to visit to save them here
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="list-header">
-                    Your saved landmarks ({savedLandmarkObjects.length})
-                  </div>
-                  {savedLandmarkObjects.map((lm) => (
-                    <div
-                      key={lm.id}
-                      className="list-item"
-                      onClick={() => {
-                        setSelected(lm);
-                        setFiltersOpen(false);
-                      }}
-                    >
-                      <div className="list-item-content">
-                        <div className="list-item-title">{lm.name}</div>
-                        <div className="list-item-subtitle">
-                          {lm.city} · {lm.typetag}
-                        </div>
-                      </div>
-                      <button
-                        className="star-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleSaved(lm.id);
-                        }}
-                        type="button"
-                        title="Remove from saved"
-                      >
-                        ★
-                      </button>
-                    </div>
-                  ))}
-                </>
-              )}
+          {/* Type */}
+          <div className="filter-section">
+            <div className="filter-section-title">Type</div>
+            <div className="chip-row">
+              {typeOptions.map((type) => (
+                <button
+                  key={type}
+                  className={`chip ${selectedType === type ? "chip-active" : ""}`}
+                  onClick={() => toggleType(type)}
+                  type="button"
+                >
+                  {type}
+                </button>
+              ))}
             </div>
+          </div>
+
+          {/* Experience */}
+          <div className="filter-section">
+            <div className="filter-section-title">Experience</div>
+            <div className="chip-row">
+              {experienceOptions.map((tag) => (
+                <button
+                  key={tag}
+                  className={`chip ${
+                    selectedExperienceTags.includes(tag) ? "chip-active" : ""
+                  }`}
+                  onClick={() => toggleExperienceTag(tag)}
+                  type="button"
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {activeCount > 0 && (
+            <button className="clear-btn" onClick={clearAllFilters} type="button">
+              Clear all
+            </button>
           )}
         </div>
       </aside>
@@ -612,22 +410,24 @@ export default function MapView() {
             onClick={() => setSelected(null)}
             type="button"
           >
-            ✕
           </button>
 
-          <div className="sheet-header">
-            <h2 className="sheet-title">{selected.name}</h2>
-            <button
-              className="star-btn-large"
-              onClick={() => toggleSaved(selected.id)}
-              type="button"
-              title={savedLandmarks.includes(selected.id) ? "Remove from saved" : "Save"}
-            >
-              {savedLandmarks.includes(selected.id) ? "★" : "☆"}
-            </button>
-          </div>
-
+          <h2 className="sheet-title">{selected.name}</h2>
+          
           <p className="sheet-desc">{selected.description}</p>
+            {selected.images?.length > 0 && (
+          <div className="sheet-gallery">
+            {selected.images.slice(0, 6).map((src, idx) => (
+              <img
+                key={`${selected.id}-img-${idx}`}
+                className="sheet-image"
+                src={src}
+                alt={`${selected.name} photo ${idx + 1}`}
+                loading="lazy"
+              />
+            ))}
+          </div>
+        )}
 
           {selected.address && (
             <p className="sheet-desc">
@@ -638,7 +438,7 @@ export default function MapView() {
           {selected.website && (
             <p className="sheet-desc">
               <a href={selected.website} target="_blank" rel="noreferrer">
-                Official site →
+                Official site
               </a>
             </p>
           )}
