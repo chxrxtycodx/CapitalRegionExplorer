@@ -2,6 +2,10 @@
    Base layout
    ========================= */
 
+
+#root .leaflet-top.leaflet-left {
+  top: 70px;
+}
 .map-page {
   position: relative;
   height: 100vh;
@@ -32,11 +36,15 @@
   z-index: 1000;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(6px);
-  padding: 12px 16px;
+  padding: 8px 12px;
   border-radius: 14px;
-  font-weight: 700;
-  font-size: 22px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.app-logo {
+  height: 100px;
+  display: block;
+  object-fit: contain;
 }
 
 /* Floating filters button (top-right) */

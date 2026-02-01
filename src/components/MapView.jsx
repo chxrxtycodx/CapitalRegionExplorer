@@ -484,8 +484,10 @@ export default function MapView() {
         </div>
       )}
 
-      {/* ✅ Floating title (top-left) */}
-      <div className="floating-title">Capital Region Explorer</div>
+      {/* ✅ Floating logo (top-left) */}
+      <div className="floating-title">
+        <img src="/src/assets/logo.jpg" alt="Capital Region Explorer" className="app-logo" />
+      </div>
 
       {/* ✅ Floating menu button (top-right) */}
       <button
